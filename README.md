@@ -1,1 +1,1 @@
-# K8s-PALLM
+# K8s-LLMAS
