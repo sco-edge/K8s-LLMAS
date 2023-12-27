@@ -1,0 +1,23 @@
+replicas: 1
+deployment:
+  image: quay.io/chenhunghan/ialacol:latest
+  env:
+    DEFAULT_MODEL_HG_REPO_ID: TheBloke/WizardLM-Uncensored-Falcon-7B-GGML
+    DEFAULT_MODEL_FILE: wizardlm-7b-uncensored.ggccv1.q4_0.bin
+    # the file name of the model file is missing `falcon` so we need to set the model type
+    MODE_TYPE: falcon
+resources:
+  {}
+model:
+  persistence:
+    size: 15Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ~
+service:
+  type: ClusterIP
+  port: 8000
+  annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
