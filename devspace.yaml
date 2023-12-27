@@ -1,0 +1,73 @@
+version: v2beta1
+
+pipelines:
+  # override the default `devspace deploy`
+  deploy: |-
+    build_images --all
+    create_deployments ialacol
+  # override the default `devspace dev`
+  dev: |-
+    start_dev ialacol
+  # `devspace run-pipeline stop-dev` to stop all dev containers
+  stop-dev: |-
+    stop_dev --all
+
+deployments:
+  ialacol:
+    helm:
+      chart:
+        name: ./charts/ialacol
+      values:
+        deployment:
+          image: python:3.11-slim
+          command: ["sleep", "999999"]
+        tolerations:
+          - key: "ai"
+            operator: "Exists"
+            effect: "NoSchedule"
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: nodegroup-ai
+                  operator: In
+                  values:
+                  - "true"
+dev:
+  ialacol:
+    labelSelector:
+      app.kubernetes.io/name: ialacol
+      app.kubernetes.io/instance: ialacol
+    namespace: ${DEVSPACE_NAMESPACE}
+    devImage: python:3.11-slim
+    workingDir: /app
+    command: ["uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+    - port: "8000:8000"
+    env:
+    - name: DEFAULT_MODEL_HG_REPO_ID
+      value: "TheBloke/Llama-2-13B-chat-GGML"
+    - name: DEFAULT_MODEL_FILE
+      value: "llama-2-13b-chat.ggmlv3.q4_0.bin"
+    - name: LOGGING_LEVEL
+      value: DEBUG
+    sync:
+      - path: ./:/app
+        excludePaths:
+        - requirements.txt
+        printLogs: true
+        uploadExcludeFile: ./.dockerignore
+        downloadExcludeFile: ./.gitignore
+      - path: ./requirements.txt:/app/requirements.txt
+        startContainer: true
+        file: true
+        printLogs: true
+        onUpload:
+          exec:
+          - command: |-
+              pip install -r requirements.txt
+            onChange: ["requirements.txt"]
+    logs:
+      enabled: true
+      lastLines: 200
