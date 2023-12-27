@@ -1,0 +1,21 @@
+replicas: 1
+deployment:
+  image: quay.io/chenhunghan/ialacol:latest
+  env:
+    DEFAULT_MODEL_HG_REPO_ID: rustformers/redpajama-ggml
+    DEFAULT_MODEL_FILE: RedPajama-INCITE-Base-3B-v1-q5_1-ggjt.bin
+resources:
+  {}
+model:
+  persistence:
+    size: 5Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ~
+service:
+  type: ClusterIP
+  port: 8000
+  annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
