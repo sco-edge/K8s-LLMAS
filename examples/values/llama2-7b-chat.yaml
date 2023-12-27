@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+Deployment:
+  image: quay.io/chenhunghan/ialacol:latest
+  env:
+    DEFAULT_MODEL_HG_REPO_ID: TheBloke/Llama-2-7B-Chat-GGML
+    DEFAULT_MODEL_FILE: llama-2-7b-chat.ggmlv3.q4_0.bi
+resources:
+  limits:
+    cpu: 100m
+model:
+  persistence:
+    size: 5Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: llama2-7b-sc
+service:
+  type: ClusterIP
+  port: 8000
+  annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
